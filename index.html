@@ -49,16 +49,14 @@
         <div class="logo">🔥</div>
         <h1>Daily Streak</h1>
         <p>Mantenha sua sequência diária!</p>
-        <button id="btnLogin" class="btn-google">
-            🚀 Entrar com Google
-        </button>
+        <button id="btnLogin" class="btn-google">🚀 Entrar com Google</button>
         <div id="loginMessage" class="login-message"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCN-U4_DmOIpdZxLpsZMejYfAWjvTVZPBo",
@@ -78,8 +76,6 @@
         const btnLogin = document.getElementById('btnLogin');
         const loginMessage = document.getElementById('loginMessage');
 
-        let isProcessing = false;
-
         function showMessage(msg, isError = true) {
             loginMessage.textContent = msg;
             loginMessage.style.color = isError ? '#f44336' : '#4caf50';
@@ -88,85 +84,34 @@
             }, 5000);
         }
 
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        // 🔥 LIMPAR SESSÕES ANTERIORES (se tiver corrompida)
-        async function clearOldSession() {
-            try {
-                const currentUser = auth.currentUser;
-                if (currentUser) {
-                    await auth.signOut();
-                    console.log('Sessão antiga limpa');
-                }
-            } catch(e) { console.log('Erro ao limpar sessão:', e); }
-        }
-
-        // 🔥 FUNÇÃO PRINCIPAL DE LOGIN
+        // 🔥 SÓ USA REDIRECT (FUNCIONA EM CELULAR E PC)
         async function handleLogin() {
-            if (isProcessing) {
-                showMessage('Aguarde, processando...');
-                return;
-            }
-            
-            isProcessing = true;
             btnLogin.disabled = true;
             btnLogin.innerHTML = '<span class="loading"></span> Carregando...';
             
             try {
-                await clearOldSession();
-                
-                if (isMobile()) {
-                    // MOBILE: usa redirect (SEM POPUP)
-                    console.log('Mobile detectado - usando redirect');
-                    await signInWithRedirect(auth, provider);
-                    // O código PARA aqui e redireciona para o Google
-                    return;
-                } else {
-                    // DESKTOP: usa popup
-                    console.log('Desktop detectado - usando popup');
-                    const result = await signInWithPopup(auth, provider);
-                    const user = result.user;
-                    console.log('Login bem-sucedido:', user.displayName);
-                    window.location.href = 'app.html';
+                // Limpa sessão anterior se existir
+                if (auth.currentUser) {
+                    await auth.signOut();
                 }
+                await signInWithRedirect(auth, provider);
             } catch (error) {
-                console.error('Erro detalhado:', error);
-                
-                if (error.code === 'auth/popup-blocked') {
-                    showMessage('⚠️ Popup bloqueado! Clique novamente.');
-                    isProcessing = false;
-                    btnLogin.disabled = false;
-                    btnLogin.innerHTML = '🚀 Entrar com Google';
-                } else if (error.code === 'auth/network-request-failed') {
-                    showMessage('⚠️ Sem internet! Verifique sua conexão.');
-                    isProcessing = false;
-                    btnLogin.disabled = false;
-                    btnLogin.innerHTML = '🚀 Entrar com Google';
-                } else if (error.code === 'auth/cancelled-popup-request') {
-                    showMessage('⚠️ Login cancelado. Tente novamente.');
-                    isProcessing = false;
-                    btnLogin.disabled = false;
-                    btnLogin.innerHTML = '🚀 Entrar com Google';
-                } else {
-                    showMessage(`❌ Erro: ${error.message}`);
-                    isProcessing = false;
-                    btnLogin.disabled = false;
-                    btnLogin.innerHTML = '🚀 Entrar com Google';
-                }
+                console.error('Erro:', error);
+                showMessage(`❌ Erro: ${error.message}`);
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '🚀 Entrar com Google';
             }
         }
 
-        // 🔥 RESULTADO DO REDIRECT (para mobile)
+        // 🔥 PROCESSA O RESULTADO DO REDIRECT
         async function handleRedirectResult() {
             try {
                 const result = await getRedirectResult(auth);
                 if (result) {
                     const user = result.user;
-                    console.log('Redirect login bem-sucedido:', user.displayName);
+                    console.log('Login bem-sucedido:', user.displayName);
                     
-                    // Salvar usuário no banco se necessário
+                    // Verifica se usuário existe no banco
                     const userRef = ref(database, `users/${user.uid}`);
                     const snapshot = await get(userRef);
                     if (!snapshot.exists()) {
@@ -177,28 +122,37 @@
                             achievements: {},
                             lastCheckin: null
                         });
+                        
+                        // Cria entrada no ranking
+                        const rankRef = ref(database, `ranking/${user.uid}`);
+                        await set(rankRef, {
+                            name: user.displayName || user.email,
+                            points: 0,
+                            photoURL: user.photoURL || '',
+                            lastActive: Date.now()
+                        });
                     }
                     
-                    window.location.href = 'app.html';
+                    // Redireciona para o app
+                    window.location.replace('app.html');
                 }
             } catch (error) {
                 console.error('Erro no redirect:', error);
                 showMessage(`❌ Erro ao completar login: ${error.message}`);
                 btnLogin.disabled = false;
                 btnLogin.innerHTML = '🚀 Entrar com Google';
-                isProcessing = false;
             }
         }
 
-        // 🔥 VERIFICAR SESSÃO ATIVA
+        // 🔥 VERIFICA SE JÁ ESTÁ LOGADO
         onAuthStateChanged(auth, (user) => {
-            if (user && window.location.pathname !== '/app.html') {
-                console.log('Usuário já logado, redirecionando...');
-                window.location.href = 'app.html';
+            if (user) {
+                console.log('Usuário já logado:', user.displayName);
+                window.location.replace('app.html');
             }
         });
 
-        // 🔥 EXECUTAR
+        // 🔥 INICIALIZA
         btnLogin.onclick = handleLogin;
         handleRedirectResult();
     </script>
