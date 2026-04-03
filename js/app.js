@@ -401,7 +401,6 @@ function shareAchievement(achievementName, streak) {
 }
 
 window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
   const installPrompt = e;
   console.log("Chrome detectou PWA! Pode instalar.");
 
