@@ -273,37 +273,144 @@ body.dark .rank-item {
 }
 
 .share-achievement-btn {
-    background: #25D366;
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    cursor: pointer;
-    margin-top: 8px;
+  background: #25d366;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-top: 8px;
 }
 
 .share-achievement-btn:hover {
-    background: #128C7E;
+  background: #128c7e;
 }
 
 body.dark .progress-bar-bg {
   background: #333;
 }
 
-/* Responsivo */
-@media (max-width: 500px) {
+/* ==================== RESPONSIVIDADE ==================== */
+
+/* Telas muito pequenas (celular antigo) */
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
   .flame {
-    font-size: 3.5rem;
+    font-size: 3.5rem !important;
   }
+
   .streak-count {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
+
+  .btn-go,
   .checkin-btn {
-    font-size: 1rem;
+    font-size: 1.2rem;
     padding: 14px;
   }
-  .stat-value {
+
+  .card-speed {
+    min-width: 120px;
+    padding: 10px;
+  }
+
+  .speed-value {
     font-size: 1.5rem;
   }
+
+  .achievements-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+  }
+
+  .rank-item {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  .calendar-grid {
+    gap: 3px;
+    padding: 10px;
+  }
+
+  .calendar-day {
+    padding: 4px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Telas médias (tablet) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .container {
+    max-width: 95%;
+    padding: 16px;
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .flame {
+    font-size: 4.5rem !important;
+  }
+}
+
+/* Telas grandes (desktop) */
+@media (min-width: 769px) {
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .checkin-btn {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+}
+
+/* ==================== AJUSTES PARA TOQUE ==================== */
+button,
+.btn-go,
+.checkin-btn,
+.share-achievement-btn {
+  cursor: pointer;
+  min-height: 44px; /* Tamanho mínimo para toque em celular */
+}
+
+/* ==================== PREVENÇÃO DE ZOOM EM INPUTS ==================== */
+input,
+textarea,
+select,
+button {
+  font-size: 16px; /* Previne zoom automático no iOS */
+}
+
+/* ==================== SMOOTH SCROLL ==================== */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ==================== MELHORIAS DE PERFORMANCE ==================== */
+* {
+  -webkit-tap-highlight-color: transparent; /* Remove fundo cinza ao tocar no celular */
+}
+
+/* ==================== LAYOUT FLEXÍVEL ==================== */
+.stats {
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  min-width: 100px;
+  flex: 1;
 }
