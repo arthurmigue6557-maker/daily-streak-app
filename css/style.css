@@ -414,3 +414,19 @@ html {
   min-width: 100px;
   flex: 1;
 }
+
+/* Botão de instalação do PWA */
+.install-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.install-btn:hover {
+    background: #45a049;
+}
