@@ -1,38 +1,59 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Streak 🔥</title>
-    <link rel="stylesheet" href="css/style.css">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="theme-color" content="#ff9800">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Daily Streak">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1828/1828970.png">
-    <!-- ==================== META TAGS PARA RESPONSIVIDADE ==================== -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta name="theme-color" content="#ff9800">
-    <!-- ==================== PWA ==================== -->
+    <title>Daily Streak - Login</title>
     <link rel="manifest" href="manifest.json">
-    < <!--====================OTIMIZAÇÃO====================-->
-        <meta name="format-detection" content="telephone=no">
-        <meta name="msapplication-tap-highlight" content="no">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Estilos específicos para tela de login */
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .logo {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+        .btn-google {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            max-width: 280px;
+            margin-top: 20px;
+        }
+        .btn-google:hover {
+            background: #357ae8;
+        }
+        .btn-google:active {
+            transform: scale(0.98);
+        }
+    </style>
 </head>
-
 <body>
     <div class="container login-container">
         <div class="logo">🔥</div>
         <h1>Daily Streak</h1>
         <p>Mantenha sua sequência diária!</p>
-        <button id="btnLogin" class="btn btn-primary">Entrar com Google</button>
+        <button id="btnLogin" class="btn-google">🚀 Entrar com Google</button>
+        <div id="loginMessage" class="login-message"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
@@ -45,21 +66,97 @@
             appId: "1:398776168775:web:b8fb249259685adc2b9c62"
         };
 
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
+        const database = getDatabase(app);
 
-        document.getElementById('btnLogin').onclick = () => {
-            signInWithPopup(auth, provider).then(() => {
-                window.location.href = 'app.html';
-            }).catch(error => alert(error.message));
+        const btnLogin = document.getElementById('btnLogin');
+        const loginMessage = document.getElementById('loginMessage');
+
+        // ==================== DETECTAR SE É MOBILE ====================
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // ==================== MOSTRAR MENSAGEM ====================
+        function showMessage(msg, isError = true) {
+            loginMessage.textContent = msg;
+            loginMessage.style.color = isError ? '#f44336' : '#4caf50';
+            setTimeout(() => {
+                loginMessage.textContent = '';
+            }, 5000);
+        }
+
+        // ==================== LOGIN CORRETO (SEM POPUP BLOQUEADO) ====================
+        btnLogin.onclick = async () => {
+            btnLogin.disabled = true;
+            btnLogin.textContent = '⏳ Carregando...';
+            
+            try {
+                if (isMobile()) {
+                    // MOBILE: usa redirect (não bloqueia, não tem popup)
+                    console.log('Mobile detectado - usando redirect');
+                    await signInWithRedirect(auth, provider);
+                } else {
+                    // DESKTOP: usa popup (mais rápido, sem recarregar)
+                    console.log('Desktop detectado - usando popup');
+                    const result = await signInWithPopup(auth, provider);
+                    const user = result.user;
+                    console.log('Usuário logado:', user.displayName);
+                    
+                    // Verificar se é primeiro acesso
+                    const userRef = ref(database, `users/${user.uid}`);
+                    const snapshot = await get(userRef);
+                    if (!snapshot.exists()) {
+                        console.log('Primeiro acesso, redirecionando...');
+                    }
+                    window.location.href = 'app.html';
+                }
+            } catch (error) {
+                console.error('Erro no login:', error);
+                if (error.code === 'auth/popup-blocked') {
+                    showMessage('⚠️ Popup bloqueado! Clique novamente para continuar.');
+                } else if (error.code === 'auth/network-request-failed') {
+                    showMessage('⚠️ Sem internet! Verifique sua conexão.');
+                } else {
+                    showMessage(`❌ Erro: ${error.message}`);
+                }
+                btnLogin.disabled = false;
+                btnLogin.textContent = '🚀 Entrar com Google';
+            }
         };
 
+        // ==================== REDIRECT RESULT (PARA MOBILE) ====================
+        async function handleRedirectResult() {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    const user = result.user;
+                    console.log('Redirect login bem-sucedido:', user.displayName);
+                    window.location.href = 'app.html';
+                }
+            } catch (error) {
+                console.error('Erro no redirect:', error);
+                if (error.code === 'auth/network-request-failed') {
+                    showMessage('⚠️ Sem internet! Verifique sua conexão.');
+                } else {
+                    showMessage(`❌ Erro: ${error.message}`);
+                }
+                btnLogin.disabled = false;
+                btnLogin.textContent = '🚀 Entrar com Google';
+            }
+        }
+
+        // ==================== VERIFICAR SESSÃO ATIVA ====================
         onAuthStateChanged(auth, (user) => {
-            if (user) window.location.href = 'app.html';
+            if (user && window.location.pathname !== '/app.html') {
+                window.location.href = 'app.html';
+            }
         });
+
+        // Executar verificação de redirect ao carregar
+        handleRedirectResult();
     </script>
 </body>
-
 </html>
