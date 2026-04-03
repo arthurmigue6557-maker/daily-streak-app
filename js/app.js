@@ -400,8 +400,32 @@ function shareAchievement(achievementName, streak) {
   }
 }
 
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  const installPrompt = e;
+  console.log("Chrome detectou PWA! Pode instalar.");
+
+  // Opcional: mostrar botão de instalação
+  const installBtn = document.createElement("button");
+  installBtn.innerText = "📱 Instalar App";
+  installBtn.className = "install-btn";
+  installBtn.onclick = () => {
+    installPrompt.prompt();
+    installPrompt.userChoice.then((choice) => {
+      if (choice.outcome === "accepted") {
+        console.log("Usuário aceitou instalar PWA");
+      }
+      installBtn.remove();
+    });
+  };
+
+  // Adicionar botão após o login (opcional)
+  // document.querySelector('.user-info').appendChild(installBtn);
+});
+
 // Logout
 btnLogout.onclick = async () => {
   await signOut(auth);
   window.location.href = "index.html";
 };
+
