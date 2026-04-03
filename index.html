@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Streak 🔥</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff9800">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Daily Streak">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1828/1828970.png">
+</head>
+
+<body>
+    <div class="container login-container">
+        <div class="logo">🔥</div>
+        <h1>Daily Streak</h1>
+        <p>Mantenha sua sequência diária!</p>
+        <button id="btnLogin" class="btn btn-primary">Entrar com Google</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCN-U4_DmOIpdZxLpsZMejYfAWjvTVZPBo",
+            authDomain: "daily-streak-app.firebaseapp.com",
+            databaseURL: "https://daily-streak-app-default-rtdb.firebaseio.com",
+            projectId: "daily-streak-app",
+            storageBucket: "daily-streak-app.firebasestorage.app",
+            messagingSenderId: "398776168775",
+            appId: "1:398776168775:web:b8fb249259685adc2b9c62"
+        };
+
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        document.getElementById('btnLogin').onclick = () => {
+            signInWithPopup(auth, provider).then(() => {
+                window.location.href = 'app.html';
+            }).catch(error => alert(error.message));
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) window.location.href = 'app.html';
+        });
+    </script>
+</body>
+
+</html>

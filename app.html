@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Daily Streak</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dark">
+    <div class="container">
+        <!-- Cabeçalho -->
+        <div class="header">
+            <div class="user-info">
+                <img id="userAvatar" src="" alt="Avatar">
+                <span id="userName"></span>
+            </div>
+            <button id="btnTheme" class="theme-toggle">🌙</button>
+            <button id="btnLogout" class="logout-btn">Sair</button>
+        </div>
+
+        <!-- Foguinho Principal -->
+        <div class="flame-container">
+            <div id="flame" class="flame">🔥</div>
+            <div id="streakCount" class="streak-count">0</div>
+            <div class="streak-label">DIAS SEGUIDOS</div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-label">Próxima conquista: 7 dias 🔥</div>
+            <div class="progress-bar-bg">
+                <div id="streakProgress" class="progress-bar-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Botão Check-in -->
+        <button id="btnCheckin" class="checkin-btn">✅ Fazer Check-in</button>
+        <div id="checkinMessage" class="checkin-message"></div>
+
+        <!-- Pontuação -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="points">0</div>
+                <div class="stat-label">Pontos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="bestStreak">0</div>
+                <div class="stat-label">Recorde 🔥</div>
+            </div>
+        </div>
+
+        <!-- Conquistas -->
+        <h3>🏆 Conquistas</h3>
+        <div id="achievements" class="achievements-grid">
+            <button class="share-achievement-btn" data-achievement="">📤 Compartilhar</button>
+        </div>
+
+        <!-- Ranking -->
+        <h3>📊 Ranking</h3>
+        <div id="ranking" class="ranking-list"></div>
+    </div>
+
+    <audio id="checkinSound" preload="auto">
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="achievementSound" preload="auto">
+        <source src="https://www.soundjay.com/misc/sounds/fanfare-6.mp3" type="audio/mpeg">
+    </audio>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+# Dependências
+node_modules/
+
+# Firebase
+.firebase/
+*.log
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Ambiente
+.env
+.env.local
+
+# Build
+dist/
+build/
+
+# Configurações locais
+*.local
